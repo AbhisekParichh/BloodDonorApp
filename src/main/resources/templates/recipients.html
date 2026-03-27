@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Available Donors</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body hx-boost="true">
+    <div id="page-content" class="container fade-in">
+        <h2>Search Available Donors</h2>
+        
+        <!-- Search Form -->
+        <form action="/recipients" method="get" class="search-form">
+            <div>
+                <label for="searchBy">Filter by:</label>
+                <select id="searchBy" name="searchBy">
+                    <option value="" selected>All Donors</option>
+                    <option value="bloodType">Blood Type</option>
+                    <option value="location">Location</option>
+                </select>
+            </div>
+            <div>
+                <label for="query">Search Query</label>
+                <input id="query" type="text" name="query" placeholder="E.g., O+ or New York">
+            </div>
+            <button type="submit">Search</button>
+        </form>
+
+        <!-- Data Table -->
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Donor Name</th>
+                        <th>Blood Type</th>
+                        <th>Location</th>
+                        <th>Contact Number</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Use Thymeleaf to iterate over recipients and display in table rows -->
+                    <tr th:each="recipient : ${recipients}">
+                        <td th:text="${recipient.name}"></td>
+                        <td th:text="${recipient.bloodType}"></td>
+                        <td th:text="${recipient.location}"></td>
+                        <td th:text="${recipient.contactInfo}"></td>
+                        <td>
+                            <button class="button" style="background-color: #ff4757; color: white; border: none; padding: 6px 12px; border-radius: 8px; font-size: 14px; cursor: pointer;" 
+                                    th:attr="onclick=|sendUrgentAlert('${recipient.contactInfo}', '${recipient.name}', '${recipient.bloodType}')|">🚨 Notify</button>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(recipients)}">
+                        <td colspan="5" style="text-align: center; color: var(--text-muted);">No donors found matching your criteria.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div style="text-align: center;">
+            <a href="/" class="button button-outline">← Back to Dashboard</a>
+        </div>
+    </div>
+
+    <script>
+        function sendUrgentAlert(contactInfo, donorName, bloodType) {
+            if(!confirm("Send an urgent SMS alert to " + donorName + "?")) return;
+            
+            fetch('/api/sms/urgent', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    contactInfo: contactInfo,
+                    donorName: donorName,
+                    bloodType: bloodType
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+            })
+            .catch(err => {
+                console.error(err);
+                alert("Failed to send request.");
+            });
+        }
+    </script>
+</body>
+</html>

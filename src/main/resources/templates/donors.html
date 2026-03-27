@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register Donor</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body hx-boost="true">
+    <div id="page-content" class="container fade-in">
+        <h2>Donor Registration</h2>
+        <form action="/donors" method="post">
+            <div>
+                <label for="name">Full Name</label>
+                <input type="text" id="name" name="name" placeholder="John Doe" required>
+            </div>
+            <div>
+                <label for="bloodType">Blood Type</label>
+                <select id="bloodType" name="bloodType" required>
+                    <option value="" disabled selected>Please select...</option>
+                    <option value="A+">A+</option>
+                    <option value="A-">A-</option>
+                    <option value="B+">B+</option>
+                    <option value="B-">B-</option>
+                    <option value="AB+">AB+</option>
+                    <option value="AB-">AB-</option>
+                    <option value="O+">O+</option>
+                    <option value="O-">O-</option>
+                </select>
+            </div>
+            <div>
+                <label for="location">Location / City</label>
+                <input type="text" id="location" name="location" placeholder="New York" required>
+            </div>
+            <div class="qr-registration-card" style="margin-top: 5px; margin-bottom: 10px; padding: 20px; background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border-radius: 16px; border: 1px solid rgba(255,255,255,0.8); box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05); display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center;">
+                <h3 style="color: var(--primary-dark); font-family: 'Poppins', sans-serif; font-size: 1.1rem; margin: 0; display: flex; align-items: center; gap: 8px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="color: #25D366;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+                    WhatsApp Registration
+                </h3>
+                <p style="color: var(--secondary-slate); font-size: 0.9rem; margin: 0; line-height: 1.4;">
+                    Please scan the QR code and <b>send the pre-filled message</b> to register your number.<br>This is required for OTP verification and notifications.
+                </p>
+                <div style="background: white; padding: 12px; border-radius: 16px; box-shadow: 0 8px 20px rgba(0,0,0,0.1); border: 2px dashed #e2e8f0;">
+                    <img src="/images/whatsapp-qr.png" alt="WhatsApp QR Code" style="width: 150px; height: 150px; display: block; border-radius: 8px; object-fit: contain;">
+                </div>
+                <p style="color: var(--text-muted); font-size: 0.82rem; margin: 0; font-style: italic; background: rgba(255,255,255,0.7); padding: 6px 12px; border-radius: 20px;">
+                    After registering, enter your phone number below to receive the OTP.
+                </p>
+            </div>
+
+            <div>
+                <label for="contactInfo">Contact Phone</label>
+                <div class="phone-input-group">
+                    <span class="phone-prefix">+91</span>
+                    <input type="text" id="contactInfo" name="contactInfo" placeholder="Enter 10-digit number" required>
+                    <button type="button" class="button" style="height: auto; padding: 10px 15px; font-size: 0.9rem; margin-top:0;"
+                            hx-post="/api/otp/send" hx-include="#contactInfo" hx-target="#otp-area">Send OTP</button>
+                </div>
+                <div id="otp-area"></div>
+            </div>
+            <button type="submit" id="submit-btn" disabled>Complete Registration</button>
+        </form>
+        
+        <div style="text-align: center;">
+            <a href="/" class="button button-outline">← Back to Dashboard</a>
+        </div>
+    </div>
+</body>
+</html>

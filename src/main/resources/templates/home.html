@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - Blood Donor App</title>
+    <link rel="stylesheet" th:href="@{/css/styles.css}">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body hx-boost="true">
+    <div id="page-content" class="container home-container fade-in">
+        <h1>Blood Donor & Recipient <br> Management System</h1>
+
+        <!-- When User is Authenticated -->
+        <div th:if="${name != null}">
+            <p style="color: var(--primary-dark); font-weight: 600; font-size: 1.2rem; margin-bottom: 10px;">Welcome back, <span th:text="${name}"></span>!</p>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">You are now securely logged into the portal.</p>
+            
+            <div class="button-container">
+                <a href="/donors" class="button green">I am a Donor</a>
+                <a href="/recipients" class="button red">I am a Recipient</a>
+            </div>
+
+            <form action="/logout" method="post" hx-boost="false" style="margin-top: 25px;">
+                <button type="submit" class="button button-outline" style="padding: 10px 20px;">Sign Out</button>
+            </form>
+        </div>
+
+        <!-- When User is NOT Authenticated -->
+        <div th:if="${name == null}">
+            <p style="color: var(--text-muted); margin-bottom: 30px;">For your security, please log in to access the system.</p>
+            
+            <div class="button-container">
+                <a href="/login" class="button red">Login to Portal</a>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <!-- AI Eligibility Assistant -->
+    <button id="ai-toggle-btn" class="ai-chat-btn">
+        <span>🤖 Check Eligibility</span>
+    </button>
+    <div id="ai-chat-window" class="ai-chat-window hidden">
+        <div class="ai-header">
+            <h4>AI Medical Assistant</h4>
+            <button id="ai-close-btn">&times;</button>
+        </div>
+        <div id="ai-messages" class="ai-messages">
+            <div class="msg ai">Hi! I can help tell you if you're eligible to donate blood. What's your medical question?</div>
+        </div>
+        <div class="ai-input-area">
+            <input type="text" id="ai-input" placeholder="e.g., Can I donate if I took aspirin?" />
+            <button id="ai-send-btn">Send</button>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // Unbind previous document listener to prevent duplicates if script runs multiple times
+            if (window._aiChatInitialized) return;
+            window._aiChatInitialized = true;
+
+            document.addEventListener('click', function(e) {
+                const toggleBtn = e.target.closest('#ai-toggle-btn');
+                const closeBtn = e.target.closest('#ai-close-btn');
+                const sendBtn = e.target.closest('#ai-send-btn');
+                const chatWindow = document.getElementById('ai-chat-window');
+
+                if (toggleBtn && chatWindow) {
+                    chatWindow.classList.toggle('hidden');
+                } else if (closeBtn && chatWindow) {
+                    chatWindow.classList.add('hidden');
+                } else if (sendBtn) {
+                    sendMessage();
+                }
+            });
+
+            document.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && e.target.id === 'ai-input') {
+                    sendMessage();
+                }
+            });
+
+            async function sendMessage() {
+                const inputField = document.getElementById('ai-input');
+                const messages = document.getElementById('ai-messages');
+                if (!inputField || !messages) return;
+
+                const text = inputField.value.trim();
+                if (!text) return;
+                
+                messages.innerHTML += `<div class="msg user">${text}</div>`;
+                inputField.value = '';
+                messages.scrollTop = messages.scrollHeight;
+                
+                const loadingId = 'loading-' + Date.now();
+                messages.innerHTML += `<div id="${loadingId}" class="msg ai loading">Typing...</div>`;
+                messages.scrollTop = messages.scrollHeight;
+
+                try {
+                    const response = await fetch('/api/ai/check-eligibility', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({question: text})
+                    });
+                    const data = await response.json();
+                    const loadingEl = document.getElementById(loadingId);
+                    if (loadingEl) loadingEl.remove();
+                    messages.innerHTML += `<div class="msg ai">${data.answer || 'Error checking eligibility.'}</div>`;
+                } catch (err) {
+                    const loadingEl = document.getElementById(loadingId);
+                    if (loadingEl) loadingEl.remove();
+                    messages.innerHTML += `<div class="msg ai">Connection error.</div>`;
+                }
+                messages.scrollTop = messages.scrollHeight;
+            }
+        })();
+    </script>
+</body>
+</html>
