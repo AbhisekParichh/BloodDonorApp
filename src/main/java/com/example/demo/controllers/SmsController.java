@@ -19,12 +19,14 @@ public class SmsController {
         String contact = payload.get("contactInfo");
         String name = payload.get("donorName");
         String bloodType = payload.get("bloodType");
+        String recipientName = payload.get("recipientName");
+        String recipientPhone = payload.get("recipientPhone");
 
-        boolean success = smsService.sendUrgentRequest(contact, name, bloodType);
-        if (success) {
+        String result = smsService.sendUrgentRequest(contact, name, bloodType, recipientName, recipientPhone);
+        if ("SUCCESS".equals(result)) {
             return ResponseEntity.ok().body(Map.of("message", "SMS Alert Sent Successfully! (Check Terminal if in Mock Mode)"));
         } else {
-            return ResponseEntity.status(500).body(Map.of("message", "Failed to send SMS Alert. Check credentials."));
+            return ResponseEntity.status(500).body(Map.of("message", result));
         }
     }
 }

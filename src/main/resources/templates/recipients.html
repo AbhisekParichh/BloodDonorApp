@@ -66,6 +66,12 @@
 
     <script>
         function sendUrgentAlert(contactInfo, donorName, bloodType) {
+            const recipientName = prompt("Enter your name so " + donorName + " knows who is asking:");
+            if (!recipientName) return; 
+
+            const recipientPhone = prompt("Enter your phone number so " + donorName + " can reach you:");
+            if (!recipientPhone) return;
+
             if(!confirm("Send an urgent SMS alert to " + donorName + "?")) return;
             
             fetch('/api/sms/urgent', {
@@ -76,7 +82,9 @@
                 body: JSON.stringify({
                     contactInfo: contactInfo,
                     donorName: donorName,
-                    bloodType: bloodType
+                    bloodType: bloodType,
+                    recipientName: recipientName,
+                    recipientPhone: recipientPhone
                 })
             })
             .then(res => res.json())

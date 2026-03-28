@@ -340,18 +340,63 @@ table tbody tr:last-child td {
 }
 
 @media (max-width: 768px) {
+    body {
+        padding: 20px 10px;
+    }
+    h1 {
+        font-size: 2rem;
+    }
+    h2 {
+        font-size: 1.5rem;
+    }
     .container {
         padding: 30px 20px;
+        width: 100%;
+        border-radius: 16px;
     }
     .search-form {
         flex-direction: column;
         align-items: stretch;
+        padding: 15px;
+    }
+    .search-form button {
+        height: auto;
+        padding: 14px;
+        margin-top: 10px;
     }
     .button-container {
         flex-direction: column;
+        gap: 15px;
     }
     .button-container .button {
         width: 100%;
+    }
+    .table-wrapper {
+        border-radius: 8px;
+    }
+    table th, table td {
+        padding: 12px 10px;
+        font-size: 0.85rem;
+    }
+    .phone-prefix {
+        padding: 0 12px;
+        font-size: 0.9rem;
+    }
+    .phone-input-group input {
+        padding: 12px 10px !important;
+        font-size: 0.9rem;
+    }
+    .ai-chat-btn {
+        right: 15px;
+        bottom: 15px;
+        padding: 12px 18px;
+        font-size: 0.95rem;
+    }
+    .ai-chat-window {
+        width: calc(100vw - 30px);
+        right: 15px;
+        bottom: 75px;
+        height: 60vh;
     }
 }
 

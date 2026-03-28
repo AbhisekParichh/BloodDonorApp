@@ -25,9 +25,9 @@ public class OtpController {
         session.setAttribute("OTP_" + contactInfo, otp);
         
         String message = "Your Blood Donor App verification code is: " + otp + ". Valid for 5 minutes.";
-        boolean sent = smsService.sendSms(contactInfo, message);
+        String result = smsService.sendSms(contactInfo, message);
 
-        if (sent) {
+        if ("SUCCESS".equals(result)) {
             return "<div id='otp-status' class='fade-in' style='margin-top: 10px;'>" +
                    "  <label style='color: var(--primary-dark);'>Enter 6-digit OTP sent to " + contactInfo + "</label>" +
                    "  <div class='phone-input-group'>" +
@@ -37,7 +37,7 @@ public class OtpController {
                    "  </div>" +
                    "</div>";
         } else {
-            return "<p style='color: red; font-size: 0.8rem;'>Failed to send OTP. Please try again.</p>";
+            return "<p style='color: red; font-size: 0.8rem;'>" + result + "</p>";
         }
     }
 

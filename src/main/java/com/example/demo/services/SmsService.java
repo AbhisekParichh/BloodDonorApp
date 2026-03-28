@@ -21,24 +21,24 @@ public class SmsService {
     @Value("${twilio.phone.number:}")
     private String fromPhoneNumber;
 
-    public boolean sendUrgentRequest(String toPhoneNumber, String donorName, String bloodType) {
-        String messageBody = "URGENT: " + donorName + ", a hospital urgently needs " + bloodType + " blood. Please log into the Blood Donor App or contact your local hospital immediately. Your donation can save a life today!";
+    public String sendUrgentRequest(String toPhoneNumber, String donorName, String bloodType, String recipientName, String recipientPhone) {
+        String messageBody = "URGENT: " + donorName + ", " + recipientName + " (" + recipientPhone + ") urgently needs " + bloodType + " blood. Please contact them immediately. Your donation can save a life today!";
         return sendSms(toPhoneNumber, messageBody);
     }
 
-    public boolean sendSms(String toPhoneNumber, String messageBody) {
+    public String sendSms(String toPhoneNumber, String messageBody) {
         if (fromPhoneNumber != null && fromPhoneNumber.startsWith("whatsapp:") && !toPhoneNumber.startsWith("whatsapp:")) {
             toPhoneNumber = "whatsapp:" + toPhoneNumber;
         }
 
         // If credentials are empty or dummy, mock the SMS
-        if (accountSid == null || accountSid.isEmpty() || accountSid.equals("YOUR_TWILIO_SID")) {
+        if (accountSid == null || accountSid.isEmpty() || accountSid.equals("YOUR_TWILIO_SID_HERE")) {
             System.out.println("=========================================");
             System.out.println("MOCK SMS TRIGGERED (No API Key provided)");
             System.out.println("TO: " + toPhoneNumber);
             System.out.println("MESSAGE: " + messageBody);
             System.out.println("=========================================");
-            return true;
+            return "SUCCESS";
         }
 
         try {
@@ -66,7 +66,7 @@ public class SmsService {
             String body = response.getBody();
             System.out.println("Twilio Response Body: " + body);
             
-            return response.getStatusCode().is2xxSuccessful();
+            return response.getStatusCode().is2xxSuccessful() ? "SUCCESS" : "Twilio Error: " + response.getStatusCode();
         } catch (Exception e) {
             System.err.println("CRITICAL ERROR: Twilio API Call failed!");
             String errorMsg = e.getMessage();
@@ -74,8 +74,18 @@ public class SmsService {
             if (e instanceof org.springframework.web.client.HttpStatusCodeException) {
                 String errorBody = ((org.springframework.web.client.HttpStatusCodeException) e).getResponseBodyAsString();
                 System.err.println("Twilio Error Body: " + errorBody);
+                if (errorBody.contains("unverified")) {
+                    return "Twilio Sandbox Error: The recipient phone number must be verified in your testing account before sending.";
+                }
+                String extractedMessage = errorBody;
+                if (errorBody.contains("\"message\"")) {
+                    try {
+                        extractedMessage = errorBody.split("\"message\":")[1].split(",")[0].replace("\"", "").trim();
+                    } catch(Exception ignored) {}
+                }
+                return "Twilio API Error: " + extractedMessage;
             }
-            return false;
+            return "Connection Error: " + errorMsg;
         }
     }
 }
